@@ -1,5 +1,5 @@
 name: opendart
-description: "OpenDart - Offline-first darts scoring app with Balatro-style gameplay."
+description: "OpenDart - Offline-first darts scoring app"
 publish_to: 'none'
 
 version: 1.0.0+1
