@@ -145,53 +145,53 @@ class _GameSummaryScreenState extends ConsumerState<GameSummaryScreen> {
 
   Widget _buildWinnerCard(Player winner) {
     return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(28),
-          decoration: AppTheme.glowCard,
-          child: Column(
-            children: [
-              Text('🎯', style: const TextStyle(fontSize: 48))
-                  .animate(onPlay: (c) => c.repeat())
-                  .scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1.1, 1.1),
-                    duration: 800.ms,
-                  )
-                  .then()
-                  .scale(
-                    begin: const Offset(1.1, 1.1),
-                    end: const Offset(0.9, 0.9),
-                    duration: 800.ms,
-                  ),
-              const SizedBox(height: 12),
-              Text(
-                'WINNER',
-                style: GoogleFonts.nunito(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.gold,
-                  letterSpacing: 3,
-                ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: AppTheme.glowCard,
+      child: Column(
+        children: [
+          Text('🎯', style: const TextStyle(fontSize: 48))
+              .animate(onPlay: (c) => c.repeat())
+              .scale(
+                begin: const Offset(0.9, 0.9),
+                end: const Offset(1.1, 1.1),
+                duration: 800.ms,
+              )
+              .then()
+              .scale(
+                begin: const Offset(1.1, 1.1),
+                end: const Offset(0.9, 0.9),
+                duration: 800.ms,
               ),
-              const SizedBox(height: 4),
-              Text(
-                winner.name,
-                style: GoogleFonts.nunito(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          Text(
+            'WINNER',
+            style: GoogleFonts.nunito(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.gold,
+              letterSpacing: 3,
+            ),
           ),
-        )
-        .animate()
-        .fadeIn(duration: 600.ms)
-        .scale(
-          begin: const Offset(0.8, 0.8),
-          curve: Curves.elasticOut,
-          duration: 700.ms,
-        );
+          const SizedBox(height: 4),
+          Text(
+            winner.name,
+            style: GoogleFonts.nunito(
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    )
+    .animate()
+    .fadeIn(duration: 600.ms)
+    .scale(
+      begin: const Offset(0.8, 0.8),
+      curve: Curves.elasticOut,
+      duration: 700.ms,
+    );
   }
 
   Widget _buildStatsGrid(GameState gs, Map<String, Player> playerMap) {
