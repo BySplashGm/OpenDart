@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_color_picker_plus/flutter_color_picker_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../models/player.dart';
 import '../../providers/players_provider.dart';
 import '../../theme/app_theme.dart';
@@ -34,7 +36,11 @@ class PlayersScreen extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.people_outline, size: 64, color: AppColors.textSecondary),
+          const Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 16),
           Text('No players yet', style: AppTheme.label),
           const SizedBox(height: 12),
@@ -58,6 +64,7 @@ class PlayersScreen extends ConsumerWidget {
 
   Future<void> _showAddDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
+    Color pickerColor = Color(0xff443a49);
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -69,20 +76,33 @@ class PlayersScreen extends ConsumerWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 20,
-          decoration: const InputDecoration(
-            hintText: 'Player name',
-            counterText: '',
-          ),
-          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        content: Column(
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              maxLength: 20,
+              decoration: const InputDecoration(
+                hintText: 'Player name',
+                counterText: '',
+              ),
+              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+            ),
+            ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (c) {
+                pickerColor = c;
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
@@ -93,7 +113,9 @@ class PlayersScreen extends ConsumerWidget {
     );
 
     if (name != null && name.isNotEmpty) {
-      await ref.read(playersProvider.notifier).addPlayer(name);
+      await ref
+          .read(playersProvider.notifier)
+          .addPlayer(name, pickerColor.toARGB32());
     }
   }
 }
@@ -122,8 +144,10 @@ class _PlayerTile extends ConsumerWidget {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surface,
-            title: Text('Delete ${player.name}?',
-                style: const TextStyle(color: AppColors.textPrimary)),
+            title: Text(
+              'Delete ${player.name}?',
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
             content: const Text(
               'Their game history will still be preserved.',
               style: TextStyle(color: AppColors.textSecondary),
@@ -177,8 +201,11 @@ class _PlayerTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined,
-                  size: 20, color: AppColors.textSecondary),
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
               onPressed: () => _showRenameDialog(context, ref),
             ),
           ],
@@ -189,6 +216,7 @@ class _PlayerTile extends ConsumerWidget {
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController(text: player.name);
+    Color pickerColor = Color(player.avatarColor);
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -196,20 +224,34 @@ class _PlayerTile extends ConsumerWidget {
         title: Text(
           'Rename Player',
           style: GoogleFonts.nunito(
-              fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
         ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 20,
-          decoration: const InputDecoration(counterText: ''),
-          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        content: Column(
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              maxLength: 20,
+              decoration: const InputDecoration(counterText: ''),
+              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+            ),
+            ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (c) {
+                pickerColor = c;
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
@@ -219,10 +261,14 @@ class _PlayerTile extends ConsumerWidget {
       ),
     );
 
-    if (name != null && name.isNotEmpty && name != player.name) {
+    if ((name != null && name.isNotEmpty) &&
+        ((name != player.name) ||
+            (pickerColor.toARGB32() != player.avatarColor))) {
       await ref
           .read(playersProvider.notifier)
-          .updatePlayer(player.copyWith(name: name));
+          .updatePlayer(
+            player.copyWith(name: name, avatarColor: pickerColor.toARGB32()),
+          );
     }
   }
 }

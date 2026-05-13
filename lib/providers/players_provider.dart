@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+
 import '../models/player.dart';
 import '../services/database_service.dart';
 
@@ -10,12 +11,12 @@ class PlayersNotifier extends AsyncNotifier<List<Player>> {
   @override
   Future<List<Player>> build() => _db.getPlayers();
 
-  Future<Player> addPlayer(String name) async {
+  Future<Player> addPlayer(String name, int color) async {
     final existing = state.valueOrNull ?? [];
     final player = Player(
       id: _uuid.v4(),
       name: name.trim(),
-      avatarColor: Player.defaultColor(existing.length),
+      avatarColor: color,
       createdAt: DateTime.now(),
     );
     await _db.insertPlayer(player);
@@ -38,5 +39,6 @@ class PlayersNotifier extends AsyncNotifier<List<Player>> {
   }
 }
 
-final playersProvider =
-    AsyncNotifierProvider<PlayersNotifier, List<Player>>(PlayersNotifier.new);
+final playersProvider = AsyncNotifierProvider<PlayersNotifier, List<Player>>(
+  PlayersNotifier.new,
+);
