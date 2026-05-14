@@ -48,6 +48,7 @@ class DatabaseService {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         avatar_color INTEGER NOT NULL,
+        avatar_emoji TEXT NOT NULL,
         created_at INTEGER NOT NULL
       )
     ''');
@@ -98,6 +99,7 @@ class DatabaseService {
 
   Future<void> insertPlayer(Player player) async {
     final db = await database;
+
     await db.insert(
       'players',
       player.toMap(),

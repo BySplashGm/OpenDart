@@ -24,11 +24,13 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_animate: ^4.5.0
   flutter_color_picker_plus: ^2.2.1
+  emoji_picker_flutter: ^4.4.0
 
   # Utilities
   intl: ^0.20.2
   uuid: ^4.5.0
   sqflite_common_ffi: ^2.4.0+3
+  characters: ^1.4.1
 
 dev_dependencies:
   flutter_test:

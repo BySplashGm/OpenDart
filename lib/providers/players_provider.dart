@@ -11,12 +11,13 @@ class PlayersNotifier extends AsyncNotifier<List<Player>> {
   @override
   Future<List<Player>> build() => _db.getPlayers();
 
-  Future<Player> addPlayer(String name, int color) async {
+  Future<Player> addPlayer(String name, int color, String avatar) async {
     final existing = state.valueOrNull ?? [];
     final player = Player(
       id: _uuid.v4(),
       name: name.trim(),
       avatarColor: color,
+      avatarEmoji: avatar,
       createdAt: DateTime.now(),
     );
     await _db.insertPlayer(player);

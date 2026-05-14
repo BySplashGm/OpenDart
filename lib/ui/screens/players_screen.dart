@@ -1,7 +1,9 @@
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_color_picker_plus/flutter_color_picker_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:google_fonts/google_fonts.dart' hide Config;
 
 import '../../models/player.dart';
 import '../../providers/players_provider.dart';
@@ -64,7 +66,10 @@ class PlayersScreen extends ConsumerWidget {
 
   Future<void> _showAddDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
-    Color pickerColor = Color(0xff443a49);
+    final emojiController = TextEditingController();
+    Color playerColor = AppColors.red;
+    //String playerEmoji = '🎯';
+    emojiController.text = '🎯';
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -76,25 +81,71 @@ class PlayersScreen extends ConsumerWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        content: Column(
-          children: [
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLength: 20,
-              decoration: const InputDecoration(
-                hintText: 'Player name',
-                counterText: '',
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: controller,
+                autofocus: true,
+                maxLength: 20,
+                decoration: const InputDecoration(
+                  hintText: 'Player name',
+                  counterText: '',
+                ),
+                onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
               ),
-              onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
-            ),
-            ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (c) {
-                pickerColor = c;
-              },
-            ),
-          ],
+              SizedBox(height: 8),
+              ColorPicker(
+                pickerColor: playerColor,
+                onColorChanged: (c) {
+                  playerColor = c;
+                },
+              ),
+              SizedBox(height: 8),
+              SizedBox(
+                height: 100,
+                width: 640,
+                child: EmojiPicker(
+                  onEmojiSelected: (c, e) {
+                    //playerEmoji = e.emoji;
+                  },
+                  onBackspacePressed: null,
+                  textEditingController: emojiController,
+                  config: Config(
+                    height: 64,
+                    //bgColor: const Color(0xFFF2F2F2),
+                    checkPlatformCompatibility: true,
+                    emojiSet: (Locale locale) {
+                      return AppEmojis.emojiSetDarts;
+                    },
+                    emojiViewConfig: EmojiViewConfig(
+                      // Issue: https://github.com/flutter/flutter/issues/28894
+                      emojiSizeMax:
+                          28 *
+                          (foundation.defaultTargetPlatform ==
+                                  TargetPlatform.iOS
+                              ? 1.20
+                              : 1.0),
+                      replaceEmojiOnLimitExceed: true,
+                      recentsLimit: 8,
+                    ),
+                    viewOrderConfig: const ViewOrderConfig(
+                      top: EmojiPickerItem.emojiView,
+                      middle: EmojiPickerItem.categoryBar,
+                      bottom: EmojiPickerItem.searchBar,
+                    ),
+                    skinToneConfig: const SkinToneConfig(),
+                    categoryViewConfig: const CategoryViewConfig(),
+                    bottomActionBarConfig: const BottomActionBarConfig(
+                      showBackspaceButton: false,
+                      showSearchViewButton: false,
+                    ),
+                    searchViewConfig: const SearchViewConfig(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -115,7 +166,11 @@ class PlayersScreen extends ConsumerWidget {
     if (name != null && name.isNotEmpty) {
       await ref
           .read(playersProvider.notifier)
-          .addPlayer(name, pickerColor.toARGB32());
+          .addPlayer(
+            name,
+            playerColor.toARGB32(),
+            emojiController.text.characters.last,
+          );
     }
   }
 }
@@ -181,7 +236,7 @@ class _PlayerTile extends ConsumerWidget {
               radius: 22,
               backgroundColor: player.color,
               child: Text(
-                player.name[0].toUpperCase(),
+                (player.avatarEmoji /*?? player.name[0].toUpperCase()*/ ),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
@@ -216,7 +271,8 @@ class _PlayerTile extends ConsumerWidget {
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController(text: player.name);
-    Color pickerColor = Color(player.avatarColor);
+    final emojiController = TextEditingController(text: player.avatarEmoji);
+    Color playerColor = Color(player.avatarColor);
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -237,11 +293,54 @@ class _PlayerTile extends ConsumerWidget {
               decoration: const InputDecoration(counterText: ''),
               onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
             ),
+            SizedBox(height: 8),
             ColorPicker(
-              pickerColor: pickerColor,
+              pickerColor: playerColor,
               onColorChanged: (c) {
-                pickerColor = c;
+                playerColor = c;
               },
+            ),
+            SizedBox(height: 8),
+            SizedBox(
+              height: 100,
+              width: 640,
+              child: EmojiPicker(
+                onEmojiSelected: (c, e) {
+                  //playerEmoji = e.emoji;
+                },
+                onBackspacePressed: null,
+                textEditingController: emojiController,
+                config: Config(
+                  height: 64,
+                  //bgColor: const Color(0xFFF2F2F2),
+                  checkPlatformCompatibility: true,
+                  emojiSet: (Locale locale) {
+                    return AppEmojis.emojiSetDarts;
+                  },
+                  emojiViewConfig: EmojiViewConfig(
+                    // Issue: https://github.com/flutter/flutter/issues/28894
+                    emojiSizeMax:
+                        28 *
+                        (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                            ? 1.20
+                            : 1.0),
+                    replaceEmojiOnLimitExceed: true,
+                    recentsLimit: 8,
+                  ),
+                  viewOrderConfig: const ViewOrderConfig(
+                    top: EmojiPickerItem.emojiView,
+                    middle: EmojiPickerItem.categoryBar,
+                    bottom: EmojiPickerItem.searchBar,
+                  ),
+                  skinToneConfig: const SkinToneConfig(),
+                  categoryViewConfig: const CategoryViewConfig(),
+                  bottomActionBarConfig: const BottomActionBarConfig(
+                    showBackspaceButton: false,
+                    showSearchViewButton: false,
+                  ),
+                  searchViewConfig: const SearchViewConfig(),
+                ),
+              ),
             ),
           ],
         ),
@@ -263,11 +362,16 @@ class _PlayerTile extends ConsumerWidget {
 
     if ((name != null && name.isNotEmpty) &&
         ((name != player.name) ||
-            (pickerColor.toARGB32() != player.avatarColor))) {
+            (playerColor.toARGB32() != player.avatarColor) ||
+            (emojiController.text.characters.last != player.avatarEmoji))) {
       await ref
           .read(playersProvider.notifier)
           .updatePlayer(
-            player.copyWith(name: name, avatarColor: pickerColor.toARGB32()),
+            player.copyWith(
+              name: name,
+              avatarColor: playerColor.toARGB32(),
+              avatar: emojiController.text.characters.last,
+            ),
           );
     }
   }
