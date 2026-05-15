@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+
+import '../models/combo_result.dart';
 import '../models/game.dart';
 import '../models/throw_record.dart';
-import '../models/combo_result.dart';
 import '../services/database_service.dart';
 import '../services/game_service.dart';
-import '../utils/score_validator.dart';
 import '../utils/constants.dart';
+import '../utils/score_validator.dart';
 
 class GameState {
   final Game game;
@@ -39,7 +40,8 @@ class GameState {
 
   int get dartsThisTurn => currentTurnThrows.length;
 
-  bool get canThrow => dartsThisTurn < AppConstants.maxDartsPerTurn && !isGameOver;
+  bool get canThrow =>
+      dartsThisTurn < AppConstants.maxDartsPerTurn && !isGameOver;
 
   GameState copyWith({
     Game? game,
@@ -52,19 +54,18 @@ class GameState {
     Map<String, int>? streakCounts,
     bool? isGameOver,
     String? Function()? bustPlayerId,
-  }) =>
-      GameState(
-        game: game ?? this.game,
-        remainingScores: remainingScores ?? this.remainingScores,
-        currentPlayerIndex: currentPlayerIndex ?? this.currentPlayerIndex,
-        currentRound: currentRound ?? this.currentRound,
-        currentTurnThrows: currentTurnThrows ?? this.currentTurnThrows,
-        allThrows: allThrows ?? this.allThrows,
-        lastCombo: lastCombo != null ? lastCombo() : this.lastCombo,
-        streakCounts: streakCounts ?? this.streakCounts,
-        isGameOver: isGameOver ?? this.isGameOver,
-        bustPlayerId: bustPlayerId != null ? bustPlayerId() : this.bustPlayerId,
-      );
+  }) => GameState(
+    game: game ?? this.game,
+    remainingScores: remainingScores ?? this.remainingScores,
+    currentPlayerIndex: currentPlayerIndex ?? this.currentPlayerIndex,
+    currentRound: currentRound ?? this.currentRound,
+    currentTurnThrows: currentTurnThrows ?? this.currentTurnThrows,
+    allThrows: allThrows ?? this.allThrows,
+    lastCombo: lastCombo != null ? lastCombo() : this.lastCombo,
+    streakCounts: streakCounts ?? this.streakCounts,
+    isGameOver: isGameOver ?? this.isGameOver,
+    bustPlayerId: bustPlayerId != null ? bustPlayerId() : this.bustPlayerId,
+  );
 }
 
 class GameNotifier extends Notifier<GameState?> {
@@ -103,7 +104,8 @@ class GameNotifier extends Notifier<GameState?> {
     );
 
     final isBust = bustResult.isBust;
-    final isWin = !isBust &&
+    final isWin =
+        !isBust &&
         ScoreValidator.isWinningThrow(
           newRemaining: bustResult.newRemaining,
           multiplierType: multiplierType,
@@ -148,7 +150,8 @@ class GameNotifier extends Notifier<GameState?> {
     }
 
     // Auto-advance turn on bust or after 3 darts
-    final turnDone = isBust || newTurnThrows.length >= AppConstants.maxDartsPerTurn;
+    final turnDone =
+        isBust || newTurnThrows.length >= AppConstants.maxDartsPerTurn;
 
     if (turnDone) {
       state = s.copyWith(
@@ -157,7 +160,12 @@ class GameNotifier extends Notifier<GameState?> {
         allThrows: newAllThrows,
         bustPlayerId: isBust ? () => s.currentPlayerId : () => null,
       );
-      await _advanceTurn(isBust: isBust, turnThrows: newTurnThrows, newScores: newScores, newAllThrows: newAllThrows);
+      await _advanceTurn(
+        isBust: isBust,
+        turnThrows: newTurnThrows,
+        newScores: newScores,
+        newAllThrows: newAllThrows,
+      );
     } else {
       state = s.copyWith(
         remainingScores: newScores,
@@ -187,7 +195,8 @@ class GameNotifier extends Notifier<GameState?> {
       final streakCount = (s.streakCounts[s.currentPlayerId] ?? 0);
 
       // Get previous player's last turn score for exact match
-      final prevPlayerIndex = (s.currentPlayerIndex - 1 + s.game.playerOrder.length) %
+      final prevPlayerIndex =
+          (s.currentPlayerIndex - 1 + s.game.playerOrder.length) %
           s.game.playerOrder.length;
       final prevPlayerId = s.game.playerOrder[prevPlayerIndex];
       final prevTurnTotal = GameService.lastTurnTotalForPlayer(
@@ -248,17 +257,47 @@ class GameNotifier extends Notifier<GameState?> {
         : s.currentTurnThrows.sublist(0, s.currentTurnThrows.length - 1);
 
     // Restore score
-    final restored = (s.remainingScores[last.playerId] ?? 0) +
+    final restored =
+        (s.remainingScores[last.playerId] ?? 0) +
         (last.isBust ? 0 : last.scoreValue);
     final newScores = {...s.remainingScores, last.playerId: restored};
 
-    state = s.copyWith(
-      remainingScores: newScores,
-      currentTurnThrows: newTurnThrows,
-      allThrows: newAllThrows,
-      lastCombo: () => null,
-      bustPlayerId: () => null,
-    );
+    //bugfix. Just in case we press "Undo" before a new throw was made after turn boundary
+    if (last.playerId != s.currentPlayerId) {
+      //Restore currentPlayerIndex to the index of last.playerId
+      final lastIndex = s.game.playerIds.indexOf(last.playerId);
+
+      //rebuild currentTurnThrows from newAllThrows filtered to the same player, round, and dart numbers preceding the undone dart
+      final rebuildTurnThrows = newAllThrows.sublist(
+        newAllThrows.length - 2,
+        newAllThrows.length,
+      );
+
+      //Decrement currentRound if the undone throw was dart 1 of a new round
+      //and if the currentPlayerIndex equals 0, as this signals the start of a new round
+      int lastCurrentRound = s.currentRound;
+      if ((s.dartsThisTurn == 0) && (s.currentPlayerIndex == 0)) {
+        --lastCurrentRound;
+      }
+
+      state = s.copyWith(
+        currentPlayerIndex: lastIndex,
+        currentRound: lastCurrentRound,
+        remainingScores: newScores,
+        currentTurnThrows: rebuildTurnThrows,
+        allThrows: newAllThrows,
+        lastCombo: () => null,
+        bustPlayerId: () => null,
+      );
+    } else {
+      state = s.copyWith(
+        remainingScores: newScores,
+        currentTurnThrows: newTurnThrows,
+        allThrows: newAllThrows,
+        lastCombo: () => null,
+        bustPlayerId: () => null,
+      );
+    }
   }
 
   void dismissCombo() {
@@ -270,4 +309,6 @@ class GameNotifier extends Notifier<GameState?> {
   void reset() => state = null;
 }
 
-final gameProvider = NotifierProvider<GameNotifier, GameState?>(GameNotifier.new);
+final gameProvider = NotifierProvider<GameNotifier, GameState?>(
+  GameNotifier.new,
+);
