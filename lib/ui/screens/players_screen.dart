@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/providers/settings_provider.dart';
+
 import '../../models/player.dart';
 import '../../providers/players_provider.dart';
 import '../../theme/app_theme.dart';
@@ -10,6 +12,7 @@ class PlayersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(settingsProvider);
     final playersAsync = ref.watch(playersProvider);
 
     return Scaffold(
@@ -34,7 +37,11 @@ class PlayersScreen extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.people_outline, size: 64, color: AppColors.textSecondary),
+          const Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 16),
           Text('No players yet', style: AppTheme.label),
           const SizedBox(height: 12),
@@ -82,7 +89,10 @@ class PlayersScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
@@ -122,8 +132,10 @@ class _PlayerTile extends ConsumerWidget {
           context: context,
           builder: (ctx) => AlertDialog(
             backgroundColor: AppColors.surface,
-            title: Text('Delete ${player.name}?',
-                style: const TextStyle(color: AppColors.textPrimary)),
+            title: Text(
+              'Delete ${player.name}?',
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
             content: const Text(
               'Their game history will still be preserved.',
               style: TextStyle(color: AppColors.textSecondary),
@@ -177,8 +189,11 @@ class _PlayerTile extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.edit_outlined,
-                  size: 20, color: AppColors.textSecondary),
+              icon: const Icon(
+                Icons.edit_outlined,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
               onPressed: () => _showRenameDialog(context, ref),
             ),
           ],
@@ -196,7 +211,9 @@ class _PlayerTile extends ConsumerWidget {
         title: Text(
           'Rename Player',
           style: GoogleFonts.nunito(
-              fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
         ),
         content: TextField(
           controller: controller,
@@ -208,8 +225,10 @@ class _PlayerTile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),

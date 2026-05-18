@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/ui/screens/game_settings_screen.dart';
+
 import '../../theme/app_theme.dart';
-import 'players_screen.dart';
 import 'game_setup_screen.dart';
+import 'players_screen.dart';
 import 'stats_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -67,20 +69,23 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildMainAction(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const GameSetupScreen()),
-        ),
-        icon: const Icon(Icons.play_arrow_rounded, size: 28),
-        label: const Text('NEW GAME'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          textStyle: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.w900),
-        ),
-      ),
-    )
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GameSetupScreen()),
+            ),
+            icon: const Icon(Icons.play_arrow_rounded, size: 28),
+            label: const Text('NEW GAME'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              textStyle: GoogleFonts.nunito(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        )
         .animate()
         .fadeIn(delay: 400.ms, duration: 500.ms)
         .slideY(begin: 0.3, end: 0);
@@ -107,6 +112,16 @@ class HomeScreen extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const StatsScreen()),
+            ),
+          ),
+        ),
+        Expanded(
+          child: _SecondaryButton(
+            icon: Icons.settings,
+            label: 'Settings',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GameSettingsScreen()),
             ),
           ),
         ),

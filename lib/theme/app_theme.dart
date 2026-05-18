@@ -117,40 +117,40 @@ abstract final class AppTheme {
   }
 
   static BoxDecoration get glowCard => BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.gold.withAlpha(80), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.gold.withAlpha(40),
-            blurRadius: 16,
-            spreadRadius: 2,
-          ),
-        ],
-      );
+    color: AppColors.surface,
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(color: AppColors.gold.withAlpha(80), width: 1.5),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.gold.withAlpha(40),
+        blurRadius: 16,
+        spreadRadius: 2,
+      ),
+    ],
+  );
 
   static BoxDecoration comboDecoration(Color color) => BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withAlpha(200), color.withAlpha(120)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: color.withAlpha(100),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      );
+    gradient: LinearGradient(
+      colors: [color.withAlpha(200), color.withAlpha(120)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: color.withAlpha(100),
+        blurRadius: 20,
+        spreadRadius: 2,
+      ),
+    ],
+  );
 
   static TextStyle scoreDisplay(double size) => GoogleFonts.nunito(
-        fontSize: size,
-        fontWeight: FontWeight.w900,
-        color: AppColors.textPrimary,
-        letterSpacing: -1,
-      );
+    fontSize: size,
+    fontWeight: FontWeight.w900,
+    color: AppColors.textPrimary,
+    letterSpacing: -1,
+  );
 
   static TextStyle label = GoogleFonts.nunito(
     fontSize: 13,

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/providers/settings_provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../models/game.dart';
 import '../../models/game_rules.dart';
 import '../../models/player.dart';
-import '../../providers/players_provider.dart';
 import '../../providers/game_provider.dart';
+import '../../providers/players_provider.dart';
 import '../../theme/app_theme.dart';
 import 'active_game_screen.dart';
 import 'players_screen.dart';
@@ -26,6 +28,7 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsAsync = ref.watch(settingsProvider);
     final playersAsync = ref.watch(playersProvider);
 
     return Scaffold(
@@ -146,7 +149,10 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                     _buildSectionLabel('COMBO MODE'),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.gold.withAlpha(40),
                         borderRadius: BorderRadius.circular(6),
@@ -255,8 +261,11 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                       ),
                     )
                   else
-                    const Icon(Icons.add_circle_outline,
-                        color: AppColors.textSecondary, size: 22),
+                    const Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.textSecondary,
+                      size: 22,
+                    ),
                 ],
               ),
             ),
@@ -276,7 +285,11 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
       ),
       child: Column(
         children: [
-          const Icon(Icons.people_outline, size: 40, color: AppColors.textSecondary),
+          const Icon(
+            Icons.people_outline,
+            size: 40,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 10),
           Text('No players found', style: AppTheme.label),
           const SizedBox(height: 10),
@@ -309,8 +322,12 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
             ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
-              backgroundColor: canStart ? AppColors.gold : AppColors.surfaceElevated,
-              foregroundColor: canStart ? AppColors.background : AppColors.textSecondary,
+              backgroundColor: canStart
+                  ? AppColors.gold
+                  : AppColors.surfaceElevated,
+              foregroundColor: canStart
+                  ? AppColors.background
+                  : AppColors.textSecondary,
             ),
           ),
         ),

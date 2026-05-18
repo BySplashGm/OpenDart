@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/providers/settings_provider.dart';
+
 import '../../models/player.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/players_provider.dart';
 import '../../theme/app_theme.dart';
-import '../widgets/combo_banner.dart';
 import '../widgets/checkout_suggestion.dart';
+import '../widgets/combo_banner.dart';
 import '../widgets/player_score_card.dart';
 import '../widgets/score_input_pad.dart';
 import 'game_summary_screen.dart';
@@ -17,13 +19,12 @@ class ActiveGameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(settingsProvider);
     final gameState = ref.watch(gameProvider);
     final playersAsync = ref.watch(playersProvider);
 
     if (gameState == null) {
-      return const Scaffold(
-        body: Center(child: Text('No active game')),
-      );
+      return const Scaffold(body: Center(child: Text('No active game')));
     }
 
     // Navigate to summary when game is over
@@ -37,7 +38,8 @@ class ActiveGameScreen extends ConsumerWidget {
     });
 
     return playersAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
       data: (players) {
         final playerMap = {for (final p in players) p.id: p};
@@ -78,8 +80,9 @@ class ActiveGameScreen extends ConsumerWidget {
                     child: ScoreInputPad(
                       enabled: gs.canThrow,
                       remainingScore: gs.currentRemaining,
-                      onThrow: (raw, type) =>
-                          ref.read(gameProvider.notifier).recordThrow(raw, type),
+                      onThrow: (raw, type) => ref
+                          .read(gameProvider.notifier)
+                          .recordThrow(raw, type),
                     ),
                   ),
                 ),
@@ -142,13 +145,13 @@ class ActiveGameScreen extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              Text(
-                'R${gs.currentRound}',
-                style: AppTheme.label,
-              ),
+              Text('R${gs.currentRound}', style: AppTheme.label),
               const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.undo_rounded, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.undo_rounded,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: gs.allThrows.isNotEmpty
                     ? () => ref.read(gameProvider.notifier).undoLastThrow()
                     : null,
@@ -160,10 +163,9 @@ class ActiveGameScreen extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${gs.currentRemaining}',
-                style: AppTheme.scoreDisplay(56),
-              ).animate(key: ValueKey(gs.currentRemaining)).scale(
+              Text('${gs.currentRemaining}', style: AppTheme.scoreDisplay(56))
+                  .animate(key: ValueKey(gs.currentRemaining))
+                  .scale(
                     begin: const Offset(1.1, 1.1),
                     end: const Offset(1, 1),
                     duration: 200.ms,
@@ -227,12 +229,15 @@ class ActiveGameScreen extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 8),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: hasThrow
                       ? (t!.isBust
-                          ? AppColors.red.withAlpha(30)
-                          : AppColors.surfaceElevated)
+                            ? AppColors.red.withAlpha(30)
+                            : AppColors.surfaceElevated)
                       : AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
@@ -242,9 +247,7 @@ class ActiveGameScreen extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  hasThrow
-                      ? (t!.isBust ? 'BUST' : '+${t.scoreValue}')
-                      : '—',
+                  hasThrow ? (t!.isBust ? 'BUST' : '+${t.scoreValue}') : '—',
                   style: GoogleFonts.nunito(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
