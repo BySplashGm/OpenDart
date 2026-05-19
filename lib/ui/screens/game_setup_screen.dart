@@ -96,7 +96,7 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: GestureDetector(
-              onTap: () => setState(() => _selectedVariant = v),
+              onTap: () => setState(() => _selectedVariant = int.parse(v)),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 padding: const EdgeInsets.symmetric(vertical: 18),
@@ -112,7 +112,7 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                   ),
                 ),
                 child: Text(
-                  '$v',
+                  v,
                   style: GoogleFonts.nunito(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,

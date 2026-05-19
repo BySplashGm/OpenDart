@@ -46,9 +46,10 @@ class Settings {
     Settings basicSettings = Settings();
     basicSettings.addValue('soundEffects', false);
     basicSettings.addValue('hapticFeedback', false);
-    basicSettings.addValue('defaultGameVariant', 501);
+    basicSettings.addValue('defaultGameVariant', "501");
     basicSettings.addValue('defaultComboMode', false);
     basicSettings.addValue('scoreConfirmation', false);
+    basicSettings.addValue('deleteAllData', false);
     return basicSettings;
   }
 }

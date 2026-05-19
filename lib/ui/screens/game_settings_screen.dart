@@ -33,14 +33,19 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
         child: settingsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),
-          data: (settings) => _buildBody(context, settings),
+          data: (settings) => buildBody(context, ref, settings),
         ),
       ),
     );
   }
 
-  dynamic _createValueSelector(int index, Settings settings /*value*/) {
-    var key = settings.settingValues.keys.elementAt(index);
+  dynamic _createValueSelector(
+    BuildContext context,
+    WidgetRef ref,
+    String key,
+    Settings settings,
+  ) {
+    //var key = settings.settingValues.keys.elementAt(index);
     var value = settings.settingValues[key];
     if (value is bool) {
       return Checkbox(
@@ -53,13 +58,27 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
         },
       );
     }
-    if (value is int) {
+    if (value is String) {
+      List<String> optionList = [];
+
+      if (key == "defaultGameVariant") {
+        optionList = GameRules.variants;
+      }
+
       return DropdownMenu(
-        initialSelection: GameRules.variants[0],
+        initialSelection: value, //optionList[index],
         dropdownMenuEntries: [
-          for (var variant in GameRules.variants)
-            DropdownMenuEntry(label: variant.toString(), value: variant),
+          for (var option in optionList)
+            DropdownMenuEntry(
+              label: option,
+              value: option,
+            ),
         ],
+        onSelected: (element) {
+          setState(() {
+            settings.settingValues[key] = element;
+          });
+        },
       );
     }
 
@@ -72,7 +91,101 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, Settings settings) {
+  Future<void> _showKillDialog(BuildContext context, WidgetRef ref) async {
+    //final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'Delete ALL Data?',
+          style: GoogleFonts.nunito(
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        /*content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 20,
+          decoration: const InputDecoration(
+            hintText: 'Player name',
+            counterText: '',
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+        ),*/
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'false'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.green),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, 'true'),
+            child: const Text(
+              'CONFIRM (WARNING! no more questions after this point! Your data WILL be lost!)',
+              style: TextStyle(color: AppColors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == "true") {
+      //Start kill sequence here ...
+    }
+  }
+
+  Widget createSettingItem(
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+    Settings settings,
+  ) {
+    var key = settings.settingValues.keys.elementAt(index);
+
+    if (key == "deleteAllData") {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () => _showKillDialog(context, ref),
+          /*Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const GameSetupScreen()),
+                    )*/
+          icon: const Icon(Icons.dangerous, size: 28),
+          label: const Text('CLEAR DATA'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            textStyle: GoogleFonts.nunito(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(
+          child: Text(
+            key,
+            style: GoogleFonts.nunito(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        _createValueSelector(context, ref, key, settings),
+      ],
+    );
+  }
+
+  Widget buildBody(BuildContext context, WidgetRef ref, Settings settings) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -84,23 +197,7 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
         padding: EdgeInsets.all(16),
         itemCount: settings.settingValues.length,
         itemBuilder: (context, int index) {
-          final key = settings.settingValues.keys.elementAt(index);
-          var value = settings.settingValues[key];
-          var valueDisplay = _createValueSelector(index, settings /*value*/);
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                key,
-                style: GoogleFonts.nunito(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              valueDisplay,
-            ],
-          );
+          return createSettingItem(context, ref, index, settings);
         },
       ),
     );
