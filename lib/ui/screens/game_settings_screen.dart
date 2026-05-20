@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:opendart/models/game_rules.dart';
 import 'package:opendart/models/settings.dart';
+import 'package:opendart/providers/players_provider.dart';
 import 'package:opendart/providers/settings_provider.dart';
 import 'package:opendart/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
@@ -135,6 +136,18 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
 
     if (result == "true") {
       //Start kill sequence here ...
+      final playersAsync = ref.watch(playersProvider);
+      final players = playersAsync.asData?.value;
+
+      if (players != null) {
+        var player = players.last;
+        int index = players.length - 1;
+        while (index >= 0) {
+          player = players.elementAt(index);
+          ref.read(playersProvider.notifier).deletePlayer(player.id);
+          --index;
+        }
+      }
     }
   }
 
