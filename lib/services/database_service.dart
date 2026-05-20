@@ -1,7 +1,11 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+
 import 'package:path/path.dart';
-import '../models/player.dart';
+//import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import '../models/game.dart';
+import '../models/player.dart';
 import '../models/throw_record.dart';
 
 class DatabaseService {
@@ -15,7 +19,19 @@ class DatabaseService {
     return _db!;
   }
 
+  //For OS specific adjustments to our DB
+  //NOTE Remove if not needed
+  Future<void> _initOS() async {
+    if (Platform.isWindows || Platform.isLinux) {
+      // 1. Initialize FFI
+      sqfliteFfiInit();
+      // 2. Set the factory
+      databaseFactory = databaseFactoryFfi;
+    }
+  }
+
   Future<Database> _init() async {
+    await _initOS();
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'opendart.db');
     return openDatabase(
@@ -83,8 +99,11 @@ class DatabaseService {
 
   Future<void> insertPlayer(Player player) async {
     final db = await database;
-    await db.insert('players', player.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'players',
+      player.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Player>> getPlayers() async {
@@ -101,8 +120,12 @@ class DatabaseService {
 
   Future<void> updatePlayer(Player player) async {
     final db = await database;
-    await db.update('players', player.toMap(),
-        where: 'id = ?', whereArgs: [player.id]);
+    await db.update(
+      'players',
+      player.toMap(),
+      where: 'id = ?',
+      whereArgs: [player.id],
+    );
   }
 
   Future<void> deletePlayer(String id) async {
@@ -114,8 +137,11 @@ class DatabaseService {
 
   Future<void> insertGame(Game game) async {
     final db = await database;
-    await db.insert('games', game.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'games',
+      game.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<Game?> getGameById(String id) async {
@@ -149,16 +175,23 @@ class DatabaseService {
 
   Future<void> updateGame(Game game) async {
     final db = await database;
-    await db.update('games', game.toMap(),
-        where: 'id = ?', whereArgs: [game.id]);
+    await db.update(
+      'games',
+      game.toMap(),
+      where: 'id = ?',
+      whereArgs: [game.id],
+    );
   }
 
   // ---- Throws ----
 
   Future<void> insertThrow(ThrowRecord t) async {
     final db = await database;
-    await db.insert('throws', t.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'throws',
+      t.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<ThrowRecord>> getThrowsForGame(String gameId) async {

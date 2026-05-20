@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/providers/settings_provider.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../models/game.dart';
 import '../../models/game_rules.dart';
 import '../../models/player.dart';
-import '../../providers/players_provider.dart';
 import '../../providers/game_provider.dart';
+import '../../providers/players_provider.dart';
 import '../../theme/app_theme.dart';
 import 'active_game_screen.dart';
 import 'players_screen.dart';
@@ -18,9 +20,25 @@ class GameSetupScreen extends ConsumerStatefulWidget {
   ConsumerState<GameSetupScreen> createState() => _GameSetupScreenState();
 }
 
+dynamic getSettings(WidgetRef ref, String key) {
+  final settingsAsync = ref.watch(settingsProvider);
+  final settings = settingsAsync.asData?.value;
+  if (settings != null) {
+    /*    if (settings != null) {
+      _comboMode = settings.settingValues['defaultComboMode'];
+    }*/
+    return settings.settingValues[key];
+  }
+  return null;
+}
+
 class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
-  int _selectedVariant = 501;
-  bool _comboMode = false;
+  late int _selectedVariant = (getSettings(ref, 'defaultGameVariant') == null)
+      ? 501
+      : int.parse(getSettings(ref, 'defaultGameVariant')); //501
+  late bool _comboMode = (getSettings(ref, 'defaultComboMode') == null)
+      ? false
+      : getSettings(ref, 'defaultComboMode');
   final List<String> _selectedPlayerIds = [];
   final _uuid = const Uuid();
 
@@ -38,7 +56,10 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, List<Player> players) {
+  Widget _buildBody(
+    BuildContext context,
+    List<Player> players,
+  ) {
     return Column(
       children: [
         Expanded(
@@ -86,14 +107,19 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
   }
 
   Widget _buildVariantSelector() {
+    /*if (settings != null) {
+      _selectedVariant = int.parse(
+        settings.settingValues['defaultGameVariant'],
+      );
+    }*/
     return Row(
       children: GameRules.variants.map((v) {
-        final selected = _selectedVariant == v;
+        final selected = _selectedVariant == int.parse(v);
         return Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: GestureDetector(
-              onTap: () => setState(() => _selectedVariant = v),
+              onTap: () => setState(() => _selectedVariant = int.parse(v)),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 padding: const EdgeInsets.symmetric(vertical: 18),
@@ -109,7 +135,7 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                   ),
                 ),
                 child: Text(
-                  '$v',
+                  v,
                   style: GoogleFonts.nunito(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -146,7 +172,10 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                     _buildSectionLabel('COMBO MODE'),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.gold.withAlpha(40),
                         borderRadius: BorderRadius.circular(6),
@@ -255,8 +284,11 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                       ),
                     )
                   else
-                    const Icon(Icons.add_circle_outline,
-                        color: AppColors.textSecondary, size: 22),
+                    const Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.textSecondary,
+                      size: 22,
+                    ),
                 ],
               ),
             ),
@@ -276,7 +308,11 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
       ),
       child: Column(
         children: [
-          const Icon(Icons.people_outline, size: 40, color: AppColors.textSecondary),
+          const Icon(
+            Icons.people_outline,
+            size: 40,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 10),
           Text('No players found', style: AppTheme.label),
           const SizedBox(height: 10),
@@ -309,8 +345,12 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
             ),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 18),
-              backgroundColor: canStart ? AppColors.gold : AppColors.surfaceElevated,
-              foregroundColor: canStart ? AppColors.background : AppColors.textSecondary,
+              backgroundColor: canStart
+                  ? AppColors.gold
+                  : AppColors.surfaceElevated,
+              foregroundColor: canStart
+                  ? AppColors.background
+                  : AppColors.textSecondary,
             ),
           ),
         ),
