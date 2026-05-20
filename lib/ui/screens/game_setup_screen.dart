@@ -20,15 +20,30 @@ class GameSetupScreen extends ConsumerStatefulWidget {
   ConsumerState<GameSetupScreen> createState() => _GameSetupScreenState();
 }
 
+dynamic getSettings(WidgetRef ref, String key) {
+  final settingsAsync = ref.watch(settingsProvider);
+  final settings = settingsAsync.asData?.value;
+  if (settings != null) {
+    /*    if (settings != null) {
+      _comboMode = settings.settingValues['defaultComboMode'];
+    }*/
+    return settings.settingValues[key];
+  }
+  return null;
+}
+
 class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
-  int _selectedVariant = 501;
-  bool _comboMode = false;
+  late int _selectedVariant = (getSettings(ref, 'defaultGameVariant') == null)
+      ? 501
+      : int.parse(getSettings(ref, 'defaultGameVariant')); //501
+  late bool _comboMode = (getSettings(ref, 'defaultComboMode') == null)
+      ? false
+      : getSettings(ref, 'defaultComboMode');
   final List<String> _selectedPlayerIds = [];
   final _uuid = const Uuid();
 
   @override
   Widget build(BuildContext context) {
-    final settingsAsync = ref.watch(settingsProvider);
     final playersAsync = ref.watch(playersProvider);
 
     return Scaffold(
@@ -41,7 +56,10 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, List<Player> players) {
+  Widget _buildBody(
+    BuildContext context,
+    List<Player> players,
+  ) {
     return Column(
       children: [
         Expanded(
@@ -89,9 +107,14 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
   }
 
   Widget _buildVariantSelector() {
+    /*if (settings != null) {
+      _selectedVariant = int.parse(
+        settings.settingValues['defaultGameVariant'],
+      );
+    }*/
     return Row(
       children: GameRules.variants.map((v) {
-        final selected = _selectedVariant == v;
+        final selected = _selectedVariant == int.parse(v);
         return Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),

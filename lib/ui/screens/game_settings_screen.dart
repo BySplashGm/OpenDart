@@ -125,7 +125,7 @@ class _GameSettingsScreenState extends ConsumerState<GameSettingsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, 'true'),
             child: const Text(
-              'CONFIRM (WARNING! no more questions after this point! Your data WILL be lost!)',
+              'CONFIRM (WARNING! no more questions beyond this point! Your data WILL be lost!)',
               style: TextStyle(color: AppColors.red),
             ),
           ),

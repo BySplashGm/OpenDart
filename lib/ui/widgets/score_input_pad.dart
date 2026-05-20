@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/models/settings.dart';
+
 import '../../models/throw_record.dart';
 import '../../theme/app_theme.dart';
 
@@ -9,12 +11,14 @@ class ScoreInputPad extends StatefulWidget {
   final OnThrowRecorded onThrow;
   final bool enabled;
   final int remainingScore;
+  final Settings? settings;
 
   const ScoreInputPad({
     super.key,
     required this.onThrow,
     required this.enabled,
     required this.remainingScore,
+    required this.settings,
   });
 
   @override
@@ -74,12 +78,17 @@ class _ScoreInputPadState extends State<ScoreInputPad> {
 
   /// Shows what's staged and the confirm / cancel actions.
   Widget _buildStagingBar() {
-    final hasStaged = _stagedValue != null;
+    bool hasStaged = _stagedValue != null;
+    if (widget.settings != null) {
+      hasStaged = widget.settings!.settingValues['scoreConfirmation'];
+    }
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: hasStaged ? AppColors.gold.withAlpha(20) : AppColors.surfaceElevated,
+        color: hasStaged
+            ? AppColors.gold.withAlpha(20)
+            : AppColors.surfaceElevated,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: hasStaged ? AppColors.gold : AppColors.border,
@@ -178,7 +187,17 @@ class _ScoreInputPadState extends State<ScoreInputPad> {
                             padding: const EdgeInsets.symmetric(horizontal: 3),
                             child: _FlexButton(
                               label: '$n',
-                              onTap: () => _stageNumber(n),
+                              onTap: () {
+                                if (widget.settings != null) {
+                                  if (!widget
+                                      .settings!
+                                      .settingValues['scoreConfirmation']) {
+                                    _stagedValue = n;
+                                    _confirmThrow();
+                                  }
+                                }
+                                return _stageNumber(n);
+                              },
                               enabled: widget.enabled,
                               highlighted: _stagedValue == n,
                             ),
@@ -346,7 +365,9 @@ class _MultiplierButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected ? activeColor.withAlpha(30) : AppColors.surfaceElevated,
+            color: selected
+                ? activeColor.withAlpha(30)
+                : AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected ? activeColor : AppColors.border,

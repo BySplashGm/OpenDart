@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:opendart/models/settings.dart';
 import 'package:opendart/providers/settings_provider.dart';
 
 import '../../models/player.dart';
@@ -19,9 +20,10 @@ class ActiveGameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsProvider);
     final gameState = ref.watch(gameProvider);
     final playersAsync = ref.watch(playersProvider);
+    final settingsAsync = ref.watch(settingsProvider);
+    final settings = settingsAsync.asData;
 
     if (gameState == null) {
       return const Scaffold(body: Center(child: Text('No active game')));
@@ -43,7 +45,7 @@ class ActiveGameScreen extends ConsumerWidget {
       error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
       data: (players) {
         final playerMap = {for (final p in players) p.id: p};
-        return _buildGame(context, ref, gameState, playerMap);
+        return _buildGame(context, ref, gameState, playerMap, settings?.value);
       },
     );
   }
@@ -53,6 +55,7 @@ class ActiveGameScreen extends ConsumerWidget {
     WidgetRef ref,
     GameState gs,
     Map<String, Player> playerMap,
+    Settings? settings,
   ) {
     final currentPlayer = playerMap[gs.currentPlayerId];
     if (currentPlayer == null) {
@@ -80,6 +83,7 @@ class ActiveGameScreen extends ConsumerWidget {
                     child: ScoreInputPad(
                       enabled: gs.canThrow,
                       remainingScore: gs.currentRemaining,
+                      settings: settings,
                       onThrow: (raw, type) => ref
                           .read(gameProvider.notifier)
                           .recordThrow(raw, type),
