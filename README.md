@@ -13,7 +13,8 @@ An open-source darts scoring app built with Flutter.
 
 ## Screenshots
 
-> Coming soon
+<img width="201" height="437" alt="simulator_screenshot_F539CEBC-6943-49A4-AA15-E67BDE1C9C6C" src="https://github.com/user-attachments/assets/321c17d3-7619-40ed-9bcc-5546407b67e7" />
+
 
 ## Getting Started
 
