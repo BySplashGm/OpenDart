@@ -86,20 +86,18 @@ class _GameSummaryScreenState extends ConsumerState<GameSummaryScreen> {
         return Stack(
           children: [
             _buildSummary(context, gameState, playerMap),
-
             Align(
               alignment: Alignment.center,
               child: ConfettiWidget(
                 confettiController: _confettiController,
                 blastDirectionality: BlastDirectionality.explosive,
-                blastDirection: -pi / 2,
-                minBlastForce: 15,
-                maxBlastForce: 20,
+                minBlastForce: 20,
+                maxBlastForce: 40,
                 emissionFrequency: 0.015,
-                minimumSize: const Size(25, 25),
-                maximumSize: const Size(50, 50),
+                minimumSize: const Size(30, 30),
+                maximumSize: const Size(60, 60),
                 numberOfParticles: 30,
-                gravity: 0.05,
+                gravity: 0.3,
                 colors: const [AppColors.gold, Colors.white],
                 createParticlePath: drawStar,
               ),
