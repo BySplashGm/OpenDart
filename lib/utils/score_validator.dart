@@ -11,7 +11,6 @@ abstract final class ScoreValidator {
     if (multiplierType == MultiplierType.outerBull) return 25;
     if (multiplierType == MultiplierType.miss) return 0;
     if (!isValidSector(rawValue)) return null;
-    if (multiplierType == MultiplierType.triple && rawValue == 25) return null; // no triple bull
     return MultiplierType.computeScore(rawValue, multiplierType);
   }
 
