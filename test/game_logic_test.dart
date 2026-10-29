@@ -178,8 +178,8 @@ void main() {
       expect(CheckoutHelper.getSuggestion(40), ['D20']);
     });
 
-    test('Bull = 50', () {
-      expect(CheckoutHelper.getSuggestion(50), ['Bull']);
+    test('Bull = S10 D20', () {
+      expect(CheckoutHelper.getSuggestion(50), ['S10', 'D20']);
     });
 
     test('170 = T20 T20 Bull', () {
@@ -190,17 +190,37 @@ void main() {
       expect(CheckoutHelper.getSuggestion(100), ['T20', 'D20']);
     });
 
-    test('no checkout for 169', () {
-      expect(CheckoutHelper.getSuggestion(169), null);
-    });
-
-    test('no checkout for 1', () {
-      expect(CheckoutHelper.getSuggestion(1), null);
-    });
-
-    test('hasCheckout returns false for impossible scores', () {
-      expect(CheckoutHelper.hasCheckout(169), false);
-      expect(CheckoutHelper.hasCheckout(168), false);
+    test ('all suggestions are arithmetically correct, getSuggestion returns null and hasCheckout returns false for impossible scores', () {
+      for (int i = 1; i < 171; i++) {
+        List<String>? output = CheckoutHelper.getSuggestion(i);
+        bool checkoutAvailable = CheckoutHelper.hasCheckout(i);
+        if (i == 1 || i == 159 || i == 162 || i == 163 || i == 165 || i == 166 || i == 168 || i == 169) {
+          expect(output, null);
+          expect(checkoutAvailable, false);
+        } else if (output != null) {
+          int sum = 0;
+          for (var element in output) {
+            if (element == 'Bull') {
+              sum += 50;
+            } else if (element == 'Outer') {
+              sum += 25;
+            } else {
+              final type = element[0];
+              if (type == 'S') {
+                sum += int.parse((element.substring(1)));
+              } else if (type == 'D') {
+                sum += 2 * int.parse(element.substring(1));
+              } else if (type == 'T') {
+                sum += 3 * int.parse(element.substring(1));
+              }
+            }
+          }
+          expect(i, sum);
+          expect(checkoutAvailable, true);
+        } else {
+          fail('null checkout suggestion despite possible score, $i');
+        }
+      }
     });
   });
 
